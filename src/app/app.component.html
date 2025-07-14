@@ -1,0 +1,56 @@
+<main class="container-lg">
+  <h1 class="text-center mb-5">Searchable Todo List</h1>
+
+  <div class="row">
+    <form #addForm="ngForm" class="mb-4 col-sm-12 col-lg-6" name="addTodoForm" (ngSubmit)="handleAddTodo(addForm)">
+      <label class="form-label">
+        Add Todo
+        <input class="form-control" name="todo" placeholder="..." maxlength="40" ngModel>
+      </label>
+
+      <label class="form-label">
+        Priority
+        <select class="form-select" name="priority" [(ngModel)]="prioritySelect">
+          <option value=1>Very High</option>
+          <option value=2>High</option>
+          <option value=3>Normal</option>
+          <option value=4>Optional</option>
+        </select>
+      </label>
+
+      <button type="submit" class="btn btn-primary">Add</button>
+    </form>
+
+    <form #searchForm="ngForm" class="mb-4 col" name="searchTodosForm" (ngSubmit)="handleSearchTodos(searchForm)" (reset)="handleSearchTodosReset()">
+      <label class="form-label">
+        Search Todos
+        <input class="form-control" name="query" placeholder="..." ngModel>
+      </label>
+
+      <button type="submit" class="btn btn-primary">Search</button>
+      <button type="reset" class="btn btn-danger">Clear</button>
+    </form>
+  </div>
+
+  <div class="row border border-2 border-secondary">
+    <div class="col p-0">
+      <h4 class="text-center text-light bg-dark m-0 p-1">Pending</h4>
+      <ul id="pendList" class="col p-0" (drop)="dropHandler($event)" (dragover)="dragoverHandler($event)">
+        @for (todo of pendingTodos; track todo.id) {
+          <li [attr.id]="todo.id" draggable="true" (dragstart)="dragstartHandler($event)">
+            <span>{{ todo.text }}</span><em>{{ priorities[todo.priority] }}</em>
+          </li>
+        }
+      </ul>
+
+      <h4 class="text-center text-light bg-dark m-0 p-1">Completed</h4>
+      <ul id="compList" class="col p-0" (drop)="dropHandler($event)" (dragover)="dragoverHandler($event)">
+        @for (todo of completedTodos; track todo.id) {
+          <li [attr.id]="todo.id" draggable="true" (dragstart)="dragstartHandler($event)">
+            <span>{{ todo.text }}</span><em>{{ priorities[todo.priority] }}</em>
+          </li>
+        }
+      </ul>
+    </div>
+  </div>
+</main>
