@@ -1,7 +1,7 @@
-import { HttpClient } from '@angular/common/http';
-import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
-import { Todo, TodosResponse } from './todos.model';
+import { Todo } from './todos/todos.model';
+import { TodosService } from './todos/todos.service';
 
 @Component({
   selector: 'app-root',
@@ -18,85 +18,32 @@ export class AppComponent implements OnInit {
     4: 'Optional'
   }
 
-  todos: Todo[] = []
-
-  prioritySelect = 3
   search = ''
-
-  private httpClient = inject(HttpClient)
-  private destroyRef = inject(DestroyRef)
+  todos: Todo[] = []
+  prioritySelect = 3
+  private todosService = inject(TodosService)
 
   ngOnInit() {
-    const subscription = this.httpClient
-      .get<{ documents: TodosResponse[] }>('https://firestore.googleapis.com/v1/projects/searchable-todo-list/databases/(default)/documents/todos')
-      .subscribe({
-        next: (resData) => {
-          for (const data of resData.documents) {
-            const idArr = data.name.split('/')
-            const id = idArr[idArr.length - 1]
-            
-            this.todos.push({
-              id: id,
-              text: data.fields.text.stringValue,
-              priority: parseInt(data.fields.priority.stringValue),
-              status: data.fields.status.stringValue
-            })
-          }
-
-          this.sortTodos()
-        }
-      })
-
-    this.destroyRef.onDestroy(() => {
-      subscription.unsubscribe()
-    })
+    this.todos = this.todosService.fetchTodos()
   }
 
   get pendingTodos() {
-    return this.todos.filter(t => t.text.includes(this.search)).filter(t => t.status === 'pending');
+    return this.todos.filter(t => t.text.includes(this.search)).filter(t => t.status === 'pending')
   }
 
   get completedTodos() {
-    return this.todos.filter(t => t.text.includes(this.search)).filter(t => t.status === 'completed');
-  }
-
-  sortTodos() {
-    this.todos.sort((a, b) => a.priority - b.priority)
+    return this.todos.filter(t => t.text.includes(this.search)).filter(t => t.status === 'completed')
   }
 
   handleAddTodo(ev: NgForm) {
     const todo = ev.form.value.todo
     const priority = ev.form.value.priority
+    
     if (todo) {
-      const fields = {
+      this.todosService.addTodo(this.todos, {
         text: { stringValue: todo },
         priority: { stringValue: priority.toString() },
         status: { stringValue: 'pending' }
-      }
-
-      const subscription = this.httpClient
-        .post<TodosResponse>(
-          'https://firestore.googleapis.com/v1/projects/searchable-todo-list/databases/(default)/documents/todos',
-          JSON.stringify({ fields }),
-          { headers: { 'Content-Type': 'application/json' } }
-        )
-        .subscribe({
-          next: (resData) => {
-            const idArr = resData.name.split('/')
-            const id = idArr[idArr.length - 1]
-            this.todos.push({
-              id: id,
-              text: todo,
-              priority: priority,
-              status: 'pending'
-            })
-
-            this.sortTodos()
-          }
-        })
-      
-      this.destroyRef.onDestroy(() => {
-        subscription.unsubscribe()
       })
     }
   }
@@ -123,27 +70,9 @@ export class AppComponent implements OnInit {
     const data = ev.dataTransfer?.getData("id");
     const todo = this.todos.find(s => s.id == data)
     const newStatus = (ev.currentTarget as HTMLElement).id == 'pendList' ? 'pending' : 'completed'
-    if (todo) {
+    if (data && todo) {
       todo.status = newStatus
-
-      const fields = { status: { stringValue: newStatus } }
-
-      const subscription = this.httpClient
-        .patch<TodosResponse>(
-          `https://firestore.googleapis.com/v1/projects/searchable-todo-list/databases/(default)/documents/todos/${data}?updateMask.fieldPaths=status`,
-          JSON.stringify({ fields }),
-          { headers: { 'Content-Type': 'application/json' } }
-        )
-        .subscribe({
-          error: () => {
-            alert('There was an error in your last request, please try again later.')
-            window.location.reload()
-          }
-        })
-
-      this.destroyRef.onDestroy(() => {
-        subscription.unsubscribe()
-      })
+      this.todosService.updateTodoStatus(data, newStatus)
     }
   }
 }
