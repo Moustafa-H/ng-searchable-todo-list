@@ -6,12 +6,10 @@ export type Todo = {
 }
 
 export interface TodosResponse {
-    'documents': {
-        'name': string
-        'fields': {
-            'text': { 'stringValue': string }
-            'priority': { 'stringValue': string }
-            'status': { 'stringValue': 'pending' | 'completed' }
-        }
-    }[]
+    name: string
+    fields: {
+        text: { stringValue: string }
+        priority: { stringValue: string }
+        status: { stringValue: 'pending' | 'completed' }
+    }
 }

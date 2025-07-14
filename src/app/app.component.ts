@@ -28,7 +28,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     const subscription = this.httpClient
-      .get<TodosResponse>('https://firestore.googleapis.com/v1/projects/searchable-todo-list/databases/(default)/documents/todos')
+      .get<{ documents: TodosResponse[] }>('https://firestore.googleapis.com/v1/projects/searchable-todo-list/databases/(default)/documents/todos')
       .subscribe({
         next: (resData) => {
           for (const data of resData.documents) {
@@ -68,14 +68,36 @@ export class AppComponent implements OnInit {
     const todo = ev.form.value.todo
     const priority = ev.form.value.priority
     if (todo) {
-      this.todos.push({
-        id: '5',
-        text: todo,
-        priority: priority,
-        status: 'pending'
-      })
+      const fields = {
+        text: { stringValue: todo },
+        priority: { stringValue: priority.toString() },
+        status: { stringValue: 'pending' }
+      }
 
-      this.sortTodos()
+      const subscription = this.httpClient
+        .post<TodosResponse>(
+          'https://firestore.googleapis.com/v1/projects/searchable-todo-list/databases/(default)/documents/todos',
+          JSON.stringify({ fields }),
+          { headers: { 'Content-Type': 'application/json' } }
+        )
+        .subscribe({
+          next: (resData) => {
+            const idArr = resData.name.split('/')
+            const id = idArr[idArr.length - 1]
+            this.todos.push({
+              id: id,
+              text: todo,
+              priority: priority,
+              status: 'pending'
+            })
+
+            this.sortTodos()
+          }
+        })
+      
+      this.destroyRef.onDestroy(() => {
+        subscription.unsubscribe()
+      })
     }
   }
 
@@ -101,7 +123,27 @@ export class AppComponent implements OnInit {
     const data = ev.dataTransfer?.getData("id");
     const todo = this.todos.find(s => s.id == data)
     const newStatus = (ev.currentTarget as HTMLElement).id == 'pendList' ? 'pending' : 'completed'
-    if (todo)
+    if (todo) {
       todo.status = newStatus
+
+      const fields = { status: { stringValue: newStatus } }
+
+      const subscription = this.httpClient
+        .patch<TodosResponse>(
+          `https://firestore.googleapis.com/v1/projects/searchable-todo-list/databases/(default)/documents/todos/${data}?updateMask.fieldPaths=status`,
+          JSON.stringify({ fields }),
+          { headers: { 'Content-Type': 'application/json' } }
+        )
+        .subscribe({
+          error: () => {
+            alert('There was an error in your last request, please try again later.')
+            window.location.reload()
+          }
+        })
+
+      this.destroyRef.onDestroy(() => {
+        subscription.unsubscribe()
+      })
+    }
   }
 }
