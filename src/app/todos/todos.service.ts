@@ -8,12 +8,18 @@ import { Todo, TodosResponse } from "./todos.model";
 export class TodosService {
     private httpClient = inject(HttpClient)
     private destroyRef = inject(DestroyRef)
+    loading = false
+  
+    isLoading() {
+        return this.loading
+    }
 
     private sortTodos(todos: Todo[]) {
         todos.sort((a, b) => a.priority - b.priority)
     }
 
     fetchTodos(): Todo[] {
+        this.loading = true
         const todos: Todo[] = []
         const subscription = this.httpClient
             .get<{ documents: TodosResponse[] }>('https://firestore.googleapis.com/v1/projects/searchable-todo-list/databases/(default)/documents/todos')
@@ -32,7 +38,13 @@ export class TodosService {
                     }
     
                     this.sortTodos(todos)
-                }
+                },
+                error: () => {
+                    alert('There was an error in your last request, please try again later.')
+                },
+                complete: () => {
+                    this.loading = false
+                },
             })
         
         this.destroyRef.onDestroy(() => {

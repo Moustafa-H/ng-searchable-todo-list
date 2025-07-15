@@ -1,19 +1,18 @@
 import { Routes } from "@angular/router";
 import { LoginComponent } from "./user/login.component";
-import { TodosComponent } from "./todos/todos.component";
 import { PageNotFoundComponent } from "./pageNotFound.component";
 
 export const routes: Routes = [
     {
         path: '',
-        component: TodosComponent
+        component: LoginComponent,
     },
     {
-        path: 'login',
-        component: LoginComponent
+        path: 'todos',
+        loadComponent: () => import('./todos/todos.component').then(mod => mod.TodosComponent),
     },
     {
         path: '**',
-        component: PageNotFoundComponent
+        component: PageNotFoundComponent,
     }
 ]

@@ -4,14 +4,14 @@ import { Todo } from "./todos.model";
 import { TodosService } from "./todos.service";
 
 @Component({
-    selector: 'app-todos',
-    standalone: true,
-    imports: [FormsModule],
-    templateUrl: './todos.component.html',
-    styleUrl: './todos.component.css',
+  selector: 'app-todos',
+  standalone: true,
+  imports: [FormsModule],
+  templateUrl: './todos.component.html',
+  styleUrl: './todos.component.css',
 })
 export class TodosComponent implements OnInit {
-    priorities: {[key: number]: string} = {
+  priorities: {[key: number]: string} = {
     1: 'Very High',
     2: 'High',
     3: 'Normal',
@@ -35,6 +35,10 @@ export class TodosComponent implements OnInit {
     return this.todos.filter(t => t.text.toLowerCase().includes(this.search)).filter(t => t.status === 'completed')
   }
 
+  get loading() {
+    return this.todosService.isLoading()
+  }
+
   handleAddTodo(ev: NgForm) {
     const todo = ev.form.value.todo
     const priority = ev.form.value.priority
@@ -46,6 +50,8 @@ export class TodosComponent implements OnInit {
         status: { stringValue: 'pending' }
       })
     }
+
+    ev.controls['todo'].reset();
   }
 
   handleSearchTodos(ev: NgForm) {
