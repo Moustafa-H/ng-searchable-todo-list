@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { DestroyRef, inject, Injectable } from "@angular/core";
-import { Todo, TodosResponse } from "./todos.model";
+import { Todo, TodosResponse, TodosResponseFields } from "../models/todos.model";
 
 @Injectable({
     providedIn: 'root'
@@ -54,7 +54,7 @@ export class TodosService {
         return todos
     }
 
-    addTodo(todos: Todo[], fields: TodosResponse['fields']) {
+    addTodo(todos: Todo[], fields: TodosResponseFields) {
         const subscription = this.httpClient
             .post<TodosResponse>(
                 'https://firestore.googleapis.com/v1/projects/searchable-todo-list/databases/(default)/documents/todos',
@@ -84,7 +84,7 @@ export class TodosService {
         })
     }
 
-    updateTodoStatus(id: string, newStatus: TodosResponse['fields']['status']['stringValue']) {
+    updateTodoStatus(id: string, newStatus: TodosResponseFields['status']['stringValue']) {
         const subscription = this.httpClient
             .patch<TodosResponse>(
                 `https://firestore.googleapis.com/v1/projects/searchable-todo-list/databases/(default)/documents/todos/${id}?updateMask.fieldPaths=status`,

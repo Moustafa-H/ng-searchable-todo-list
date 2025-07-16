@@ -1,10 +1,8 @@
-<h1 class="text-center mb-5">Searchable Todo List</h1>
-
 <div class="row">
     <form #addForm="ngForm" class="mb-4 col-sm-12 col-lg-6" name="addTodoForm" (ngSubmit)="handleAddTodo(addForm)">
         <label class="form-label">
         Add Todo
-        <input class="form-control" name="todo" placeholder="..." maxlength="40" ngModel [disabled]="loading?true:false">
+        <input class="form-control" name="todo" maxlength="40" ngModel [disabled]="loading?true:false">
         </label>
 
         <label class="form-label">
@@ -23,7 +21,7 @@
     <form #searchForm="ngForm" class="mb-4 col" name="searchTodosForm" (ngSubmit)="handleSearchTodos(searchForm)" (reset)="handleSearchTodosReset()">
         <label class="form-label">
         Search Todos
-        <input class="form-control" name="query" placeholder="..." ngModel [disabled]="loading?true:false">
+        <input class="form-control" name="query" ngModel [disabled]="loading?true:false">
         </label>
 
         <button type="submit" class="btn btn-primary">Search</button>

@@ -1,0 +1,33 @@
+<form #loginForm="ngForm" (ngSubmit)="handleLogin(loginForm)" class="d-flex flex-column">
+    <mat-form-field>
+        <mat-label>Email</mat-label>
+        <input matInput type="email" name="email" ngModel required>
+    </mat-form-field>
+    
+    <mat-form-field>
+        <mat-label>Password</mat-label>
+        <input
+            matInput
+            [type]="hidePwd() ? 'password' : 'text'"
+            name="password"
+            ngModel
+            required
+        >
+        <button
+            mat-icon-button
+            matSuffix
+            (click)="clickEvent($event)"
+            type="button"
+        >
+            <mat-icon>{{hidePwd() ? 'visibility_off' : 'visibility'}}</mat-icon>
+        </button>
+    </mat-form-field>
+
+    <button mat-stroked-button [disabled]="isLoading">
+        @if (!isLoading) {
+            Login
+        } @else {
+            <mat-spinner [diameter]="24" [strokeWidth]="3"></mat-spinner>
+        }
+    </button>
+</form>
