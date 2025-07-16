@@ -7,7 +7,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FormsModule, NgForm } from "@angular/forms";
 import { Router } from "@angular/router";
 import { AuthService } from "../services/auth.service";
-import { finalize } from "rxjs/operators";
+import { finalize, take } from "rxjs/operators";
 
 @Component({
     selector: 'app-login',
@@ -36,7 +36,7 @@ export class AuthComponent {
         this.authService.login(email, password)
             .pipe(finalize(() => this.isLoading = false))
             .subscribe({
-                next: (resData) => {
+                next: () => {
                     this.router.navigate(['/todos'])
                 },
                 error: (errorMessage) => {
